@@ -1,4 +1,4 @@
-#VERSION: 2.29
+#VERSION: 2.30
 
 #AUTHORS: Adrian Mocan (adrian.mocan@gmail.com)
 
@@ -82,7 +82,7 @@ class filelist(object):
     # Init the cookie handler.
     cj = cookielib.CookieJar()
     self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    #self.opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+    # self.opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     # Sign in.
     url_cookie = self.opener.open(self.login_page, urllib.urlencode(self.cookie_values)) # (the cj CookieJar gets automatically cookies)
     # Verify cookies
@@ -137,7 +137,7 @@ class filelist(object):
       if (tag == "a") and (self.columnCount == 2):
         downloadLink = attrsDict["href"]
         self.crtTorrent["link"] = self.createLink(downloadLink, attrsDict["title"])
-        self.crtTorrent["desc_link"] = self.url + '/' +  downloadLink
+        self.crtTorrent["desc_link"] = self.url + '/' + downloadLink
       if tag == "div":
         if self.insideRow:
           self.torrentrowDepth += 1
@@ -152,12 +152,13 @@ class filelist(object):
         if (("class" in attrsDict) and (attrsDict["class"] == "torrenttable")):
           self.columnCount += 1    
       if (tag == "img") and (self.columnCount == 2):
-        self.isFree = True
+        if (("alt" in attrsDict) and (attrsDict["alt"] == "FreeLeech")):
+          self.isFree = True
           
     def createLink(self, downloadUrl, title):
       """build the download link from the details link, without parsing the download page"""
       newUrl = downloadUrl.replace("details", "download") 
-      return self.url + '/' +  newUrl
+      return self.url + '/' + newUrl
     
     def handle_endtag(self, tag):
       if self.insideRow:
@@ -165,8 +166,8 @@ class filelist(object):
           self.torrentrowDepth -= 1
           if self.torrentrowDepth < 0:
             self.insideRow = False
-            self.crtTorrent["name"] = ("__FREELEECH__" if self.isFree else "") + self.torrentRow["c2"]
-            self.crtTorrent["size"] =  str(int(round (float(self.torrentRow["c7"]) * 1024 * 1024)))
+            self.crtTorrent["name"] = ("FreeLeech " if self.isFree else "") + self.torrentRow["c2"]
+            self.crtTorrent["size"] =  self.torrentRow["c7"]
             self.crtTorrent["seeds"] = self.torrentRow["c9"]
             self.crtTorrent["leech"] = self.torrentRow["c10"]
             self.crtTorrent["engine_url"] = self.url
@@ -178,6 +179,15 @@ class filelist(object):
         key = "c" + str(self.columnCount)
         if not (key in self.torrentRow):
           self.torrentRow[key] = data
+        # Calculate size (in bytes)
+        if (data == "kB"):
+          self.torrentRow["c7"] = str(int(float(self.torrentRow["c7"]) * 1024))
+        if (data == "MB"):
+          self.torrentRow["c7"] = str(int(float(self.torrentRow["c7"]) * 1024 * 1024))
+        if (data == "GB"):
+          self.torrentRow["c7"] = str(int(float(self.torrentRow["c7"]) * 1024 * 1024 * 1024))
+        if (data == "TB"):
+          self.torrentRow["c7"] = str(int(float(self.torrentRow["c7"]) * 1024 * 1024 * 1024 * 1024))
 
 
   def search(self, what, cat='all'):
@@ -187,7 +197,7 @@ class filelist(object):
       self._sign_in()
       opener = self.opener
     else:
-      opener = urllib2.build_opener(urllib2.BaseHandler())    
+      opener = urllib2.build_opener(urllib2.BaseHandler())
     ret = []
     page = 0
     while page < self.PAGE_NUMBER:
