@@ -30,13 +30,37 @@ from novaprinter import prettyPrinter
 from helpers import download_file
 #from helpers import retrieve_url, download_file
 
-import StringIO, gzip, urllib2, tempfile
-import sgmllib
-import HTMLParser
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+try:    
+    from urllib import urlencode, quote, unquote
+    from urllib2 import build_opener, HTTPCookieProcessor, URLError, HTTPError
+except ImportError:
+    from urllib.parse import urlencode, quote, unquote
+    from urllib.request import build_opener, HTTPCookieProcessor
+    from urllib.error import URLError, HTTPError
+
+try:
+    from HTMLParser import HTMLParser
+except ImportError:
+    from html.parser import HTMLParser
+
+try:
+    from http.cookiejar import CookieJar
+except ImportError:
+    from cookielib import CookieJar
+    
+try:
+    import sgmllib
+except:
+    import sgmllib3
+
+import gzip, tempfile
 import re
-# Cookies:
 import os
-import cookielib, urllib
 import tempfile
 
 class filelist(object):
@@ -53,13 +77,13 @@ class filelist(object):
   # Debug / Log:
   debug = False
   # URL of the login page:
-  login_page = "http://filelist.ro/takelogin.php"
+  login_page = "https://filelist.ro/takelogin.php"
   # ids and values of the login page fields:
   cookie_values = {'username':username, 'password':password}
   # Name of one of the obtained cookies (to verify):
   cookie2verify = 'uid' 
   log_file_name = os.path.join(tempfile.gettempdir(), "qbittorrent_filelist_plugin.log")
-  url = 'http://www.filelist.ro'
+  url = 'https://www.filelist.ro'
   name = 'filelist'
 #  supported_categories = {'all': '0', 'movies': '11', 'tv': '33', 'music': '3', 'games': '13', 'anime': '19', 'software': '12', 'books': '5'}
   supported_categories = {'all': '0'}
@@ -73,18 +97,18 @@ class filelist(object):
 
   def log(self, msg):
     if self.debug:
-      #print(msg)
+      print(msg)
       log_file = open(self.log_file_name, "a")
       log_file.write(msg)
       log_file.close()
       
   def _sign_in(self):
     # Init the cookie handler.
-    cj = cookielib.CookieJar()
-    self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+    cj = CookieJar()
+    self.opener = build_opener(HTTPCookieProcessor(cj))
     # self.opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     # Sign in.
-    url_cookie = self.opener.open(self.login_page, urllib.urlencode(self.cookie_values)) # (the cj CookieJar gets automatically cookies)
+    url_cookie = self.opener.open(self.login_page, urlencode(self.cookie_values).encode('UTF-8')) # (the cj CookieJar gets automatically cookies)
     # Verify cookies
     if self.cookie2verify != '':
       page_cookie = url_cookie.read(500000)
@@ -92,7 +116,7 @@ class filelist(object):
       if not self.cookie2verify in [cookie.name for cookie in cj]:
         msg = "Unable to sign in with username=%s and password=%s" % (self.username,self.password)
         self.log(msg)
-        raise ValueError, msg
+        raise ValueError(msg)
       elif self.debug:
         msg = "Sign-in successful\n"
         self.log(msg)
@@ -118,9 +142,9 @@ class filelist(object):
     print (path+" "+url)
     
 
-  class FilelistParser(HTMLParser.HTMLParser):
+  class FilelistParser(HTMLParser):
     def __init__(self, results, url):
-      HTMLParser.HTMLParser.__init__(self)
+      HTMLParser.__init__(self)
       self.rowCount = 0
       self.columnCount = 0
       self.activeTag = ""
@@ -191,6 +215,7 @@ class filelist(object):
 
 
   def search(self, what, cat='all'):
+    self.log('searching for {}'.format(what))
     """search the torrent parsing the site"""
     # Sign in:
     if self.search_auth:
@@ -203,7 +228,7 @@ class filelist(object):
     while page < self.PAGE_NUMBER:
       results = []
       parser = self.FilelistParser(results, self.url)
-      url = self.url+'/browse.php?search=%s&cat=%s&searchin=0&sort=0&page=%d'%(what, self.supported_categories[cat], page)
+      url = "{}/browse.php?search={}&cat={}&searchin=0&sort=0&page={}".format(self.url, what, self.supported_categories[cat], page)
       f = opener.open(url)
       dat = f.read().decode('iso-8859-1', 'replace')
       results_re = re.compile("(?s)<div class='cblock-innercontent'>.*")
