@@ -75,7 +75,7 @@ class filelist(object):
   search_auth = True   # is an authentication necessary to search torrents ?
   download_auth = True  # is an authentication necessary to download torrents ?
   # Debug / Log:
-  debug = True
+  debug = False
   # URL of the login page:
   login_page = "https://filelist.ro/takelogin.php"
   # ids and values of the login page fields:
