@@ -1,4 +1,4 @@
-#VERSION: 2.30
+#VERSION: 2.40
 
 #AUTHORS: Adrian Mocan (adrian.mocan@gmail.com)
 
