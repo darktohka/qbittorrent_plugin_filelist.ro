@@ -75,7 +75,7 @@ class filelist(object):
   search_auth = True   # is an authentication necessary to search torrents ?
   download_auth = True  # is an authentication necessary to download torrents ?
   # Debug / Log:
-  debug = False
+  debug = True
   # URL of the login page:
   login_page = "https://filelist.ro/takelogin.php"
   # ids and values of the login page fields:
@@ -97,9 +97,10 @@ class filelist(object):
 
   def log(self, msg):
     if self.debug:
-      print(msg)
+      #print(msg)
       log_file = open(self.log_file_name, "a")
       log_file.write(msg)
+      log_file.write("\n")
       log_file.close()
       
   def _sign_in(self):
@@ -114,11 +115,11 @@ class filelist(object):
       page_cookie = url_cookie.read(500000)
       msg = ''
       if not self.cookie2verify in [cookie.name for cookie in cj]:
-        msg = "Unable to sign in with username=%s and password=%s" % (self.username,self.password)
+        msg = "Unable to sign in with username={} and password={}".format(self.username,self.password)
         self.log(msg)
         raise ValueError(msg)
       elif self.debug:
-        msg = "Sign-in successful\n"
+        msg = "Sign-in successful"
         self.log(msg)
         
   def download_torrent(self, url):
@@ -137,10 +138,8 @@ class filelist(object):
     file.write(dat)
     file.close()
     # Logging:
-    logMsg = path+"; from: "+url+"\n"
-    self.log(logMsg)
-    print (path+" "+url)
-    
+    self.log("{}; from: {}".format(path, url))
+    print(path+" "+url)
 
   class FilelistParser(HTMLParser):
     def __init__(self, results, url):
