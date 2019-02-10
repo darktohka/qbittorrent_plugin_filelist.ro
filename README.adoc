@@ -1,0 +1,29 @@
+= Filelist plugin
+
+This is a plugin for https://www.qbittorrent.org/[qBittorrent] that searches torrents using https://filelist.ro/[filelist.ro]. 
+[IMPORTANT]
+====
+[big red]*You need to have a filelist account to use this plugin!!!*
+====
+
+
+== Install
+From qBittorent *'Search'* footnoteref:[SearchNotPresentNote, If you don't see the 'Search' tab, try to check 'Search Engine' in the 'View' menu] tab press *'Search plugins...'*, then *'Install a new one'*, then *'Web link'*. Supply this *'URL'*: https://raw.githubusercontent.com/adrianmocan/qbittorrent_plugin_filelist.ro/master/filelist_ro/filelist.py[https://raw.githubusercontent.com/adrianmocan/qbittorrent_plugin_filelist.ro/master/filelist_ro/filelist.py] and then press 'OK'.
+[NOTE]
+====
+You need to configure the installation with your filelist username and password.
+====
+
+== Configuration
+=== Method 1
+* Run a search in qBittorrent.You will see and error from the filelist plugin that will tell you to edit a file.
+* Open that file with a text editor and change 'bula' and 'parola_lui_bula' (in lines 70 and 72) with your filelist username and password. Save the file.
+* Done. Try to search again with qBittorrent. 
+
+=== Method 2
+* Download the plugin from here on your computer. Open the downloaded file (filelist.py) with a text editor and change the username and password (lines 70 and 72) with your actual filelist username and password. Save the file.
+* Install the modified file as plugin in qBittorrent:
+** Go to *'Search'* tab footnoteref:[SearchNotPresentNote], *'Search plugins...'*, *'Install a new one'*, 
+*'Local file'*
+** Choose the file downloaded file you just modified.
+* Done. Try to search again with qBittorrent.

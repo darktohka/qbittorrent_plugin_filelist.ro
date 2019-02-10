@@ -1,4 +1,4 @@
-#VERSION: 2.40
+#VERSION: 2.50
 
 #AUTHORS: Adrian Mocan (adrian.mocan@gmail.com)
 
@@ -35,7 +35,7 @@ try:
 except ImportError:
     from io import StringIO
 
-try:    
+try:
     from urllib import urlencode, quote, unquote
     from urllib2 import build_opener, HTTPCookieProcessor, URLError, HTTPError
 except ImportError:
@@ -103,7 +103,8 @@ class filelist(object):
       log_file.write("\n")
       log_file.close()
       
-  def _sign_in(self):
+  def _sign_in(self, what):
+    self.log("Signing-in")
     # Init the cookie handler.
     cj = CookieJar()
     self.opener = build_opener(HTTPCookieProcessor(cj))
@@ -111,17 +112,29 @@ class filelist(object):
     # Sign in.
     url_cookie = self.opener.open(self.login_page, urlencode(self.cookie_values).encode('UTF-8')) # (the cj CookieJar gets automatically cookies)
     # Verify cookies
+    msg = ""
     if self.cookie2verify != '':
       page_cookie = url_cookie.read(500000)
-      msg = ''
       if not self.cookie2verify in [cookie.name for cookie in cj]:
-        msg = "Unable to sign in with username={} and password={}".format(self.username,self.password)
+        credentials = (self.username, self.password)
+        msg = "Unable to sign in with username=%s and password=%s." % credentials
+        if self.username == 'bula' and self.password == 'parola_lui_bula':
+          problem = "Setup error"
+          currentFile = os.path.realpath(__file__)
+          proposed_solution = "Edit file: '%s' to set user and password (lines 70 and 72)." % currentFile
+        else:
+          problem = "Sign-in error"
+          proposed_solution = "Try to login into filelist.ro using the same credentials."
+        self.handle_error(problem, what, proposed_solution)
+        msg = msg + " " + proposed_solution
         self.log(msg)
         raise ValueError(msg)
       elif self.debug:
         msg = "Sign-in successful"
-        self.log(msg)
-        
+    else:
+      msg = "cookie '{}' was empty".format(self.cookie2verify)
+    self.log(msg)
+
   def download_torrent(self, url):
     # Sign in:
     if self.download_auth:
@@ -177,7 +190,7 @@ class filelist(object):
       if (tag == "img") and (self.columnCount == 2):
         if (("alt" in attrsDict) and (attrsDict["alt"] == "FreeLeech")):
           self.isFree = True
-          
+      
     def createLink(self, downloadUrl, title):
       """build the download link from the details link, without parsing the download page"""
       newUrl = downloadUrl.replace("details", "download") 
@@ -189,7 +202,7 @@ class filelist(object):
           self.torrentrowDepth -= 1
           if self.torrentrowDepth < 0:
             self.insideRow = False
-            self.crtTorrent["name"] = ("FreeLeech " if self.isFree else "") + self.torrentRow["c2"]
+            self.crtTorrent["name"] = ("FREELEECH " if self.isFree else "") + self.torrentRow["c2"]
             self.crtTorrent["size"] =  self.torrentRow["c7"]
             self.crtTorrent["seeds"] = self.torrentRow["c9"]
             self.crtTorrent["leech"] = self.torrentRow["c10"]
@@ -218,7 +231,7 @@ class filelist(object):
     """search the torrent parsing the site"""
     # Sign in:
     if self.search_auth:
-      self._sign_in()
+      self._sign_in(what)
       opener = self.opener
     else:
       opener = urllib2.build_opener(urllib2.BaseHandler())
@@ -240,3 +253,17 @@ class filelist(object):
         break
       page += 1
       
+  def handle_error(self, error_msg, what, fixForError = ""):
+    # we need to add the search text(what) to 'name' so that the error is shown in 
+    # qBittorrent when 'Torrent names only' is enabled.
+    # So you need to pass 'what' parameter through all the functions chain up to 'handle_error'
+    prettyPrinter({
+      'seeds': -1,
+      'size': -1,
+      'leech': -1,
+      'engine_url': self.url,
+      'link': self.url,
+      'desc_link': 'https://github.com/adrianmocan/qbittorrent_plugin_filelist.ro/blob/master/README.adoc',
+      'name': "Filelist: %s! Click 'Go to description' button to open help. %s Search was: '%s'" % (error_msg, fixForError, what)
+  })
+  
