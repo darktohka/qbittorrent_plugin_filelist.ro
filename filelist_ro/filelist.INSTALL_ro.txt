@@ -1,11 +1,11 @@
-Motor de căutare neoficial pentru qBittorrent (> = 2.6.3)
+Motor de căutare neoficial pentru qBittorrent (> = 4.1.6)
 Tracker: FileList (http://www.filelist.ro)
 Autentificarea  (nume de utilizator / parola) folosind cookie-uri.
 
 Cum se instalează:
 
 1)  - Deschideți scriptul filelist.py într-un editor de text.
-    - Se inlocuieste în liniile 46 si 48 (numele de utilizator și parola care le aveți la site-ul filelist.ro).
+    - Se inlocuieste în liniile 70 si 70 (numele de utilizator și parola care le aveți la site-ul filelist.ro).
     - Salvați scriptul filelist.py (fara a schimba numele).
 
 

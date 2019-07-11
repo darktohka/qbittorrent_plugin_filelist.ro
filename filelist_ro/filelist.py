@@ -1,4 +1,4 @@
-#VERSION: 2.50
+#VERSION: 2.51
 
 #AUTHORS: Adrian Mocan (adrian.mocan@gmail.com)
 
@@ -103,7 +103,7 @@ class filelist(object):
       log_file.write("\n")
       log_file.close()
       
-  def _sign_in(self, what):
+  def _sign_in(self, what=""):
     self.log("Signing-in")
     # Init the cookie handler.
     cj = CookieJar()
@@ -115,9 +115,10 @@ class filelist(object):
     msg = ""
     if self.cookie2verify != '':
       page_cookie = url_cookie.read(500000)
+      msg = ''
       if not self.cookie2verify in [cookie.name for cookie in cj]:
         credentials = (self.username, self.password)
-        msg = "Unable to sign in with username=%s and password=%s." % credentials
+        msg = "Unable to sign in with username={} and password={}".format(self.username,self.password)
         if self.username == 'bula' and self.password == 'parola_lui_bula':
           problem = "Setup error"
           currentFile = os.path.realpath(__file__)
@@ -153,6 +154,7 @@ class filelist(object):
     # Logging:
     self.log("{}; from: {}".format(path, url))
     print(path+" "+url)
+
 
   class FilelistParser(HTMLParser):
     def __init__(self, results, url):
@@ -190,7 +192,7 @@ class filelist(object):
       if (tag == "img") and (self.columnCount == 2):
         if (("alt" in attrsDict) and (attrsDict["alt"] == "FreeLeech")):
           self.isFree = True
-      
+
     def createLink(self, downloadUrl, title):
       """build the download link from the details link, without parsing the download page"""
       newUrl = downloadUrl.replace("details", "download") 
@@ -267,3 +269,4 @@ class filelist(object):
       'name': "Filelist: %s! Click 'Go to description' button to open help. %s Search was: '%s'" % (error_msg, fixForError, what)
   })
   
+

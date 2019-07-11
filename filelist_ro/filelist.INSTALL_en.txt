@@ -1,4 +1,4 @@
-Extra Search Engine for qBittorrent (>= 2.6.3)
+Extra Search Engine for qBittorrent (>= 4.1.6)
 Tracker : Filelist (http://www.filelist.ro)
 Authentication by login (username/password) using cookies.
 
@@ -6,8 +6,8 @@ HOW TO INSTALL:
 
 1) REQUIRED:
    - Open the filelist.py script in a text-file editor.
-   - Fill in your data in the 46th and 48th lines (username and password).
-   - Save the filelist.py script (without changing his name).
+   - Fill in your username and password (in the lines 70 and 72).
+   - Save the filelist.py script (without changing its name).
 
 
 2) - Open qBittorrent and click on the Search tab.
@@ -17,5 +17,5 @@ HOW TO INSTALL:
 
 HOW TO UNINSTALL:
    - Open qBittorrent and click on the Search tab.
-   - Then, click on the [Search Engines...] button (at the bottom right of the tab).
+   - Click on the [Search Engines...] button (at the bottom right of the tab).
    - Select the filelist Search Engine, then right-click on, and choose Uninstall.
